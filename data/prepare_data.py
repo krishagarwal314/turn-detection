@@ -63,25 +63,28 @@ def stored_path(path: Path) -> str:
         return str(path)
 
 
-def pipecat_rows(limit: int | None, raw_dir: Path, languages: list[str]) -> list[dict]:
+def pipecat_rows(limit: int | None, raw_dir: Path, languages: list[str], allow_synthetic_languages: set[str]) -> list[dict]:
     # Stream rows so the large HF dataset is never materialized in Colab RAM.
     dataset = load_dataset("pipecat-ai/smart-turn-data-v3.2-train", split="train", streaming=True)
     dataset = dataset.cast_column("audio", Audio(decode=False))
     rows: list[dict] = []
     language_counts: Counter[str] = Counter()
     filler_counts: Counter[str] = Counter()
+    synthetic_counts: Counter[str] = Counter()
     per_language_limit = {language: limit // len(languages) for language in languages} if limit else {}
     per_language_counts: Counter[str] = Counter()
     for example in tqdm(dataset, desc="Filtering real Pipecat clips"):
-        if bool_or_false(example.get("synthetic")):
-            continue
         language = str(example.get("language"))
         if language not in languages:
+            continue
+        synthetic = bool_or_false(example.get("synthetic"))
+        if synthetic and language not in allow_synthetic_languages:
             continue
         if limit and per_language_counts[language] >= per_language_limit[language]:
             continue
         language_counts[language] += 1
         per_language_counts[language] += 1
+        synthetic_counts[language] += int(synthetic)
         filler_counts["midfiller"] += int(bool_or_false(example.get("midfiller")))
         filler_counts["endfiller"] += int(bool_or_false(example.get("endfiller")))
         path = raw_dir / "pipecat" / f"{example['id']}.wav"
@@ -90,12 +93,13 @@ def pipecat_rows(limit: int | None, raw_dir: Path, languages: list[str]) -> list
             "id": str(example["id"]), "source": "pipecat", "audio_path": stored_path(path),
             "language": str(example["language"]), "endpoint_bool": bool_or_false(example["endpoint_bool"]),
             "midfiller": bool_or_false(example.get("midfiller")), "endfiller": bool_or_false(example.get("endfiller")),
-            "synthetic": False, "dataset": str(example.get("dataset", "")), "transcript": example.get("spoken_text") or "",
+            "synthetic": synthetic, "dataset": str(example.get("dataset", "")), "transcript": example.get("spoken_text") or "",
         })
         if limit and len(rows) >= limit:
             break
-    print("Real-only Pipecat rows:", len(rows))
+    print("Retained Pipecat rows:", len(rows))
     print("Language counts:", dict(language_counts))
+    print("Synthetic counts:", dict(synthetic_counts))
     print("Filler counts:", dict(filler_counts))
     return rows
 
@@ -130,13 +134,14 @@ def main() -> None:
     parser.add_argument("--hinglish-manifest", type=Path, default=ROOT / "data" / "hinglish_manifest.csv")
     parser.add_argument("--max-pipecat-clips", type=int, default=None, help="Use a small smoke-test subset before a Colab run.")
     parser.add_argument("--languages", nargs="+", default=["eng", "hin"], help="Retain only these Pipecat language codes (default: eng hin).")
+    parser.add_argument("--allow-synthetic-languages", nargs="+", default=["hin"], help="Allow synthetic clips only for these languages (default: hin).")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     if args.max_pipecat_clips and args.max_pipecat_clips < len(args.languages):
         raise ValueError("--max-pipecat-clips must be at least the number of requested languages")
     if args.max_pipecat_clips and args.max_pipecat_clips % len(args.languages):
         raise ValueError("--max-pipecat-clips must divide evenly across requested languages")
-    pipecat = pipecat_rows(args.max_pipecat_clips, args.raw_dir, args.languages)
+    pipecat = pipecat_rows(args.max_pipecat_clips, args.raw_dir, args.languages, set(args.allow_synthetic_languages))
     hinglish = hinglish_rows(args.hinglish_manifest)
     if len(pipecat) < 10:
         raise RuntimeError("Too few real Pipecat rows after filtering.")
@@ -151,8 +156,11 @@ def main() -> None:
                 handle.write(json.dumps(row) + "\n")
         print(split, len(rows), Counter(row["source"] for row in rows))
     report = {
-        "real_pipecat_clips": len(pipecat),
+        "retained_pipecat_clips": len(pipecat),
+        "real_pipecat_clips": sum(not row["synthetic"] for row in pipecat),
+        "synthetic_pipecat_clips": sum(row["synthetic"] for row in pipecat),
         "language_counts": dict(Counter(row["language"] for row in pipecat)),
+        "synthetic_by_language": dict(Counter(row["language"] for row in pipecat if row["synthetic"])),
         "endpoint_counts": dict(Counter(str(row["endpoint_bool"]) for row in pipecat)),
         "filler_counts": {"midfiller": sum(row["midfiller"] for row in pipecat), "endfiller": sum(row["endfiller"] for row in pipecat)},
         "split_counts": {split: len(pipecat_splits[split]) + len(hinglish_splits[split]) for split in ("train", "val", "test")},
