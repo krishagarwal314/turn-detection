@@ -49,7 +49,7 @@ notebooks/train_colab.ipynb   # thin Colab wrapper around the scripts
 
 The primary source is [`pipecat-ai/smart-turn-data-v3.2-train`](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train). It is a 271k-row, approximately 41 GB audio dataset. `prepare_data.py` first removes every row where `synthetic == True`; no synthetic/TTS clip is used. It then prints and stores the exact surviving count, counts by language, endpoint balance, and `midfiller`/`endfiller` balance in `data/processed/filter_report.json`. Do not claim those values before running the filter—the dataset can change upstream.
 
-`eng` and `hin` are the primary languages of interest, but all real languages are retained initially. The language field is one value per clip, so it does not represent code-switching inside an utterance. That is why the separate Hinglish set is necessary.
+The Pipecat pipeline retains only real `eng` and `hin` clips by default (`--languages eng hin`); other languages are excluded before audio is downloaded or cached. The language field is one value per clip, so it does not represent code-switching inside an utterance. That is why the separate hand-recorded Hinglish set is useful for evaluating code-switching behavior.
 
 Create the curated recording sheet once:
 

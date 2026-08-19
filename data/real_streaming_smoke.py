@@ -29,6 +29,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path, default=ROOT / ".validation_artifacts" / "real_smoke")
     parser.add_argument("--real-rows", type=int, default=300)
+    parser.add_argument("--languages", nargs="+", default=["eng", "hin"], help="Retain only these language codes (default: eng hin).")
     args = parser.parse_args()
     raw_dir = args.output_dir / "raw"
     rows = []
@@ -42,7 +43,7 @@ def main() -> None:
     scanned = 0
     for example in stream:
         scanned += 1
-        if example.get("synthetic") is not False:
+        if example.get("synthetic") is not False or str(example.get("language")) not in set(args.languages):
             continue
         audio_array = load_dataset_audio(example["audio"])
         audio_path = raw_dir / f"{example['id']}.wav"

@@ -63,7 +63,7 @@ def stored_path(path: Path) -> str:
         return str(path)
 
 
-def pipecat_rows(limit: int | None, raw_dir: Path) -> list[dict]:
+def pipecat_rows(limit: int | None, raw_dir: Path, languages: set[str]) -> list[dict]:
     dataset = load_dataset("pipecat-ai/smart-turn-data-v3.2-train", split="train")
     dataset = dataset.cast_column("audio", Audio(decode=False))
     rows: list[dict] = []
@@ -71,6 +71,8 @@ def pipecat_rows(limit: int | None, raw_dir: Path) -> list[dict]:
     filler_counts: Counter[str] = Counter()
     for example in tqdm(dataset, desc="Filtering real Pipecat clips"):
         if bool_or_false(example.get("synthetic")):
+            continue
+        if str(example.get("language")) not in languages:
             continue
         language_counts[str(example["language"])] += 1
         filler_counts["midfiller"] += int(bool_or_false(example.get("midfiller")))
@@ -120,9 +122,10 @@ def main() -> None:
     parser.add_argument("--raw-dir", type=Path, default=ROOT / "data" / "raw", help="Use Google Drive here in Colab so downloaded audio survives resets.")
     parser.add_argument("--hinglish-manifest", type=Path, default=ROOT / "data" / "hinglish_manifest.csv")
     parser.add_argument("--max-pipecat-clips", type=int, default=None, help="Use a small smoke-test subset before a Colab run.")
+    parser.add_argument("--languages", nargs="+", default=["eng", "hin"], help="Retain only these Pipecat language codes (default: eng hin).")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
-    pipecat = pipecat_rows(args.max_pipecat_clips, args.raw_dir)
+    pipecat = pipecat_rows(args.max_pipecat_clips, args.raw_dir, set(args.languages))
     hinglish = hinglish_rows(args.hinglish_manifest)
     if len(pipecat) < 10:
         raise RuntimeError("Too few real Pipecat rows after filtering.")
