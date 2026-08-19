@@ -87,7 +87,8 @@ def main() -> None:
     parser.add_argument("--hidden-size", type=int, default=192)
     parser.add_argument("--num-layers", type=int, default=1)
     parser.add_argument("--dropout", type=float, default=0.1)
-    parser.add_argument("--loss", choices=["weighted_bce", "focal"], default="weighted_bce")
+    parser.add_argument("--loss", choices=["weighted_bce", "bce", "focal"], default="weighted_bce")
+    parser.add_argument("--pos-weight-scale", type=float, default=1.0, help="Scale the weighted-BCE positive class weight; lower values favor precision.")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--checkpoint-every-steps", type=int, default=0, help="Save last.pt every N optimizer steps; enables exact mid-epoch resume.")
@@ -103,7 +104,12 @@ def main() -> None:
     positives = sum(int(item["labels"].sum()) for item in train_ds)
     total = sum(len(item["labels"]) for item in train_ds)
     pos_weight = torch.tensor([(total - positives) / max(positives, 1)], device=device)
-    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight) if args.loss == "weighted_bce" else FocalLoss(alpha=float(pos_weight.item() / (1 + pos_weight.item())))
+    if args.loss == "weighted_bce":
+        criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight * args.pos_weight_scale)
+    elif args.loss == "bce":
+        criterion = nn.BCEWithLogitsLoss()
+    else:
+        criterion = FocalLoss(alpha=float(pos_weight.item() / (1 + pos_weight.item())))
     model = GRUTurnClassifier(hidden_size=args.hidden_size, num_layers=args.num_layers, dropout=args.dropout).to(device)
     optimizer = AdamW((p for p in model.parameters() if p.requires_grad), lr=args.lr, weight_decay=1e-2)
     start_epoch = 0; resume_batch = 0; resume_indices = None; global_step = 0; best_f1 = -1.0

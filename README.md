@@ -88,7 +88,7 @@ For a full baseline, run the same commands without the sample cap, preferably on
 
 ### Loss and experiments
 
-`train.py` performs many-to-many sequence labeling and masks padded timesteps through `pack_padded_sequence`; padded entries are also excluded from loss. The default weighted BCE uses the training-window class ratio. Use the alternate focal implementation with `--loss focal`.
+`train.py` performs many-to-many sequence labeling and masks padded timesteps through `pack_padded_sequence`; padded entries are also excluded from loss. The default weighted BCE uses the training-window class ratio. Use `--pos-weight-scale` below 1.0 to trade some recall for precision, or use unweighted BCE with `--loss bce`. The alternate focal implementation is available with `--loss focal`.
 
 ```bash
 # Frozen Whisper Tiny baseline: cached, fast iteration
