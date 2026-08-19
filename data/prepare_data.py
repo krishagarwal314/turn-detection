@@ -29,7 +29,7 @@ def bool_or_false(value: object) -> bool:
 
 def stratum(row: dict) -> str:
     # Filler presence is intentionally part of the split stratum.
-    return f"{int(bool_or_false(row['endpoint_bool']))}_{int(bool_or_false(row.get('midfiller')))}_{int(bool_or_false(row.get('endfiller')))}"
+    return f"{row.get('language', '')}_{int(bool_or_false(row['endpoint_bool']))}_{int(bool_or_false(row.get('midfiller')))}_{int(bool_or_false(row.get('endfiller')))}"
 
 
 def split_rows(rows: list[dict], seed: int, val_fraction: float, test_fraction: float) -> dict[str, list[dict]]:
@@ -63,19 +63,25 @@ def stored_path(path: Path) -> str:
         return str(path)
 
 
-def pipecat_rows(limit: int | None, raw_dir: Path, languages: set[str]) -> list[dict]:
+def pipecat_rows(limit: int | None, raw_dir: Path, languages: list[str]) -> list[dict]:
     # Stream rows so the large HF dataset is never materialized in Colab RAM.
     dataset = load_dataset("pipecat-ai/smart-turn-data-v3.2-train", split="train", streaming=True)
     dataset = dataset.cast_column("audio", Audio(decode=False))
     rows: list[dict] = []
     language_counts: Counter[str] = Counter()
     filler_counts: Counter[str] = Counter()
+    per_language_limit = {language: limit // len(languages) for language in languages} if limit else {}
+    per_language_counts: Counter[str] = Counter()
     for example in tqdm(dataset, desc="Filtering real Pipecat clips"):
         if bool_or_false(example.get("synthetic")):
             continue
-        if str(example.get("language")) not in languages:
+        language = str(example.get("language"))
+        if language not in languages:
             continue
-        language_counts[str(example["language"])] += 1
+        if limit and per_language_counts[language] >= per_language_limit[language]:
+            continue
+        language_counts[language] += 1
+        per_language_counts[language] += 1
         filler_counts["midfiller"] += int(bool_or_false(example.get("midfiller")))
         filler_counts["endfiller"] += int(bool_or_false(example.get("endfiller")))
         path = raw_dir / "pipecat" / f"{example['id']}.wav"
@@ -126,7 +132,11 @@ def main() -> None:
     parser.add_argument("--languages", nargs="+", default=["eng", "hin"], help="Retain only these Pipecat language codes (default: eng hin).")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
-    pipecat = pipecat_rows(args.max_pipecat_clips, args.raw_dir, set(args.languages))
+    if args.max_pipecat_clips and args.max_pipecat_clips < len(args.languages):
+        raise ValueError("--max-pipecat-clips must be at least the number of requested languages")
+    if args.max_pipecat_clips and args.max_pipecat_clips % len(args.languages):
+        raise ValueError("--max-pipecat-clips must divide evenly across requested languages")
+    pipecat = pipecat_rows(args.max_pipecat_clips, args.raw_dir, args.languages)
     hinglish = hinglish_rows(args.hinglish_manifest)
     if len(pipecat) < 10:
         raise RuntimeError("Too few real Pipecat rows after filtering.")
