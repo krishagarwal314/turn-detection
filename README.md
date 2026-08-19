@@ -160,7 +160,7 @@ gh auth login
 gh repo create streaming-turn-detection --private --source=. --remote=origin --push
 ```
 
-There are no AI co-author trailers or external commit attribution. Checkpoints, raw audio, and embedding caches are ignored; keep them on Drive during Colab training. If you later publish a small final checkpoint, use Git LFS or link to Drive rather than committing large binary artifacts normally.
+Checkpoints, raw audio, and embedding caches are ignored; keep them on Drive during Colab training. If you later publish a small final checkpoint, use Git LFS or link to Drive rather than committing large binary artifacts normally.
 
 ## Known limitations / next steps
 
