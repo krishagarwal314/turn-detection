@@ -1,0 +1,32 @@
+__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+env/
+.env
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Large, locally generated ML artifacts
+data/raw/
+data/processed/
+data/cache/
+data/hinglish_recordings/*.wav
+data/hinglish_recordings/*.flac
+data/hinglish_recordings/*.mp3
+checkpoints/
+runs/
+wandb/
+.validation_artifacts/
+*.pt
+*.pth
+*.ckpt
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/

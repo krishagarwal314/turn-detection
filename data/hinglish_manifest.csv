@@ -1,0 +1,121 @@
+id,audio_file,endpoint_bool,midfiller,endfiller,transcript,recording_notes
+001,hinglish_001.wav,true,false,true,"haan theek hai, main kal morning mein update bhej dunga",Natural conversational delivery; include a umm hesitation where appropriate.
+002,hinglish_002.wav,false,true,false,"mujhe Hyderabad ka weather batao, actually wait, Bangalore bhi",Natural conversational delivery; include a uh hesitation where appropriate.
+003,hinglish_003.wav,true,false,false,mujhe Hyderabad ka weather bata do,Natural conversational delivery; include a actually hesitation where appropriate.
+004,hinglish_004.wav,false,true,false,"um main report share karunga, matlab pehle ek cheez check kar loon",Natural conversational delivery; include a matlab hesitation where appropriate.
+005,hinglish_005.wav,true,false,false,please is order ko cancel kar do,Natural conversational delivery; include a like hesitation where appropriate.
+006,hinglish_006.wav,false,true,false,"please invoice bhej do, uh, ek minute, new address add karna hai",Natural conversational delivery; include a umm hesitation where appropriate.
+007,hinglish_007.wav,true,false,false,meeting ko Friday afternoon par shift kar dete hain,Natural conversational delivery; include a uh hesitation where appropriate.
+008,hinglish_008.wav,false,true,false,"aaj standup mein main bolunga ki, like, deployment pending hai",Natural conversational delivery; include a actually hesitation where appropriate.
+009,hinglish_009.wav,true,false,false,main abhi payment complete kar raha hoon,Natural conversational delivery; include a matlab hesitation where appropriate.
+010,hinglish_010.wav,false,true,false,"customer ko bolo ki refund, actually partial refund process hoga",Natural conversational delivery; include a like hesitation where appropriate.
+011,hinglish_011.wav,true,false,true,yeh option mujhe kaafi useful laga,Natural conversational delivery; include a umm hesitation where appropriate.
+012,hinglish_012.wav,false,true,false,"main Delhi jaa raha hoon, matlab agar train confirm hui toh",Natural conversational delivery; include a uh hesitation where appropriate.
+013,hinglish_013.wav,true,false,false,aap customer ko ek polite follow-up bhej do,Natural conversational delivery; include a actually hesitation where appropriate.
+014,hinglish_014.wav,false,true,false,"ye file upload kar do aur, um, uske baad validation run karna",Natural conversational delivery; include a matlab hesitation where appropriate.
+015,hinglish_015.wav,true,false,false,Bangalore ka traffic aaj bahut heavy hai,Natural conversational delivery; include a like hesitation where appropriate.
+016,hinglish_016.wav,false,true,false,"mujhe analytics dashboard kholo, actually sales wala tab",Natural conversational delivery; include a umm hesitation where appropriate.
+017,hinglish_017.wav,true,false,false,mujhe English mein summary chahiye,Natural conversational delivery; include a uh hesitation where appropriate.
+018,hinglish_018.wav,false,true,false,"agar API fail ho rahi hai toh, uh, logs bhi dekh lena",Natural conversational delivery; include a actually hesitation where appropriate.
+019,hinglish_019.wav,true,false,false,"haan, is problem ka solution deploy kar do",Natural conversational delivery; include a matlab hesitation where appropriate.
+020,hinglish_020.wav,false,true,false,"main soch raha tha ki, like, feature flag enable kar dein",Natural conversational delivery; include a like hesitation where appropriate.
+021,hinglish_021.wav,true,false,true,mera package kal tak deliver hona chahiye,Natural conversational delivery; include a umm hesitation where appropriate.
+022,hinglish_022.wav,false,true,false,"kal ka schedule bhej do, matlab team calendar wala",Natural conversational delivery; include a uh hesitation where appropriate.
+023,hinglish_023.wav,true,false,false,"chalo, main baad mein call karta hoon",Natural conversational delivery; include a actually hesitation where appropriate.
+024,hinglish_024.wav,false,true,false,"mujhe courier track karna hai, actually AWB number abhi bhejta hoon",Natural conversational delivery; include a matlab hesitation where appropriate.
+025,hinglish_025.wav,true,false,false,"haan theek hai, main kal morning mein update bhej dunga",Natural conversational delivery; include a like hesitation where appropriate.
+026,hinglish_026.wav,false,true,false,"mujhe Hyderabad ka weather batao, actually wait, Bangalore bhi",Natural conversational delivery; include a umm hesitation where appropriate.
+027,hinglish_027.wav,true,false,false,mujhe Hyderabad ka weather bata do,Natural conversational delivery; include a uh hesitation where appropriate.
+028,hinglish_028.wav,false,true,false,"um main report share karunga, matlab pehle ek cheez check kar loon",Natural conversational delivery; include a actually hesitation where appropriate.
+029,hinglish_029.wav,true,false,false,please is order ko cancel kar do,Natural conversational delivery; include a matlab hesitation where appropriate.
+030,hinglish_030.wav,false,true,false,"please invoice bhej do, uh, ek minute, new address add karna hai",Natural conversational delivery; include a like hesitation where appropriate.
+031,hinglish_031.wav,true,false,true,meeting ko Friday afternoon par shift kar dete hain,Natural conversational delivery; include a umm hesitation where appropriate.
+032,hinglish_032.wav,false,true,false,"aaj standup mein main bolunga ki, like, deployment pending hai",Natural conversational delivery; include a uh hesitation where appropriate.
+033,hinglish_033.wav,true,false,false,main abhi payment complete kar raha hoon,Natural conversational delivery; include a actually hesitation where appropriate.
+034,hinglish_034.wav,false,true,false,"customer ko bolo ki refund, actually partial refund process hoga",Natural conversational delivery; include a matlab hesitation where appropriate.
+035,hinglish_035.wav,true,false,false,yeh option mujhe kaafi useful laga,Natural conversational delivery; include a like hesitation where appropriate.
+036,hinglish_036.wav,false,true,false,"main Delhi jaa raha hoon, matlab agar train confirm hui toh",Natural conversational delivery; include a umm hesitation where appropriate.
+037,hinglish_037.wav,true,false,false,aap customer ko ek polite follow-up bhej do,Natural conversational delivery; include a uh hesitation where appropriate.
+038,hinglish_038.wav,false,true,false,"ye file upload kar do aur, um, uske baad validation run karna",Natural conversational delivery; include a actually hesitation where appropriate.
+039,hinglish_039.wav,true,false,false,Bangalore ka traffic aaj bahut heavy hai,Natural conversational delivery; include a matlab hesitation where appropriate.
+040,hinglish_040.wav,false,true,false,"mujhe analytics dashboard kholo, actually sales wala tab",Natural conversational delivery; include a like hesitation where appropriate.
+041,hinglish_041.wav,true,true,true,mujhe English mein summary chahiye,Natural conversational delivery; include a umm hesitation where appropriate.
+042,hinglish_042.wav,false,true,false,"agar API fail ho rahi hai toh, uh, logs bhi dekh lena",Natural conversational delivery; include a uh hesitation where appropriate.
+043,hinglish_043.wav,true,false,false,"haan, is problem ka solution deploy kar do",Natural conversational delivery; include a actually hesitation where appropriate.
+044,hinglish_044.wav,false,true,false,"main soch raha tha ki, like, feature flag enable kar dein",Natural conversational delivery; include a matlab hesitation where appropriate.
+045,hinglish_045.wav,true,false,false,mera package kal tak deliver hona chahiye,Natural conversational delivery; include a like hesitation where appropriate.
+046,hinglish_046.wav,false,true,false,"kal ka schedule bhej do, matlab team calendar wala",Natural conversational delivery; include a umm hesitation where appropriate.
+047,hinglish_047.wav,true,false,false,"chalo, main baad mein call karta hoon",Natural conversational delivery; include a uh hesitation where appropriate.
+048,hinglish_048.wav,false,true,false,"mujhe courier track karna hai, actually AWB number abhi bhejta hoon",Natural conversational delivery; include a actually hesitation where appropriate.
+049,hinglish_049.wav,true,false,false,"haan theek hai, main kal morning mein update bhej dunga",Natural conversational delivery; include a matlab hesitation where appropriate.
+050,hinglish_050.wav,false,true,false,"mujhe Hyderabad ka weather batao, actually wait, Bangalore bhi",Natural conversational delivery; include a like hesitation where appropriate.
+051,hinglish_051.wav,true,false,true,mujhe Hyderabad ka weather bata do,Natural conversational delivery; include a umm hesitation where appropriate.
+052,hinglish_052.wav,false,true,false,"um main report share karunga, matlab pehle ek cheez check kar loon",Natural conversational delivery; include a uh hesitation where appropriate.
+053,hinglish_053.wav,true,false,false,please is order ko cancel kar do,Natural conversational delivery; include a actually hesitation where appropriate.
+054,hinglish_054.wav,false,true,false,"please invoice bhej do, uh, ek minute, new address add karna hai",Natural conversational delivery; include a matlab hesitation where appropriate.
+055,hinglish_055.wav,true,false,false,meeting ko Friday afternoon par shift kar dete hain,Natural conversational delivery; include a like hesitation where appropriate.
+056,hinglish_056.wav,false,true,false,"aaj standup mein main bolunga ki, like, deployment pending hai",Natural conversational delivery; include a umm hesitation where appropriate.
+057,hinglish_057.wav,true,false,false,main abhi payment complete kar raha hoon,Natural conversational delivery; include a uh hesitation where appropriate.
+058,hinglish_058.wav,false,true,false,"customer ko bolo ki refund, actually partial refund process hoga",Natural conversational delivery; include a actually hesitation where appropriate.
+059,hinglish_059.wav,true,false,false,yeh option mujhe kaafi useful laga,Natural conversational delivery; include a matlab hesitation where appropriate.
+060,hinglish_060.wav,false,true,false,"main Delhi jaa raha hoon, matlab agar train confirm hui toh",Natural conversational delivery; include a like hesitation where appropriate.
+061,hinglish_061.wav,true,false,true,aap customer ko ek polite follow-up bhej do,Natural conversational delivery; include a umm hesitation where appropriate.
+062,hinglish_062.wav,false,true,false,"ye file upload kar do aur, um, uske baad validation run karna",Natural conversational delivery; include a uh hesitation where appropriate.
+063,hinglish_063.wav,true,false,false,Bangalore ka traffic aaj bahut heavy hai,Natural conversational delivery; include a actually hesitation where appropriate.
+064,hinglish_064.wav,false,true,false,"mujhe analytics dashboard kholo, actually sales wala tab",Natural conversational delivery; include a matlab hesitation where appropriate.
+065,hinglish_065.wav,true,false,false,mujhe English mein summary chahiye,Natural conversational delivery; include a like hesitation where appropriate.
+066,hinglish_066.wav,false,true,false,"agar API fail ho rahi hai toh, uh, logs bhi dekh lena",Natural conversational delivery; include a umm hesitation where appropriate.
+067,hinglish_067.wav,true,false,false,"haan, is problem ka solution deploy kar do",Natural conversational delivery; include a uh hesitation where appropriate.
+068,hinglish_068.wav,false,true,false,"main soch raha tha ki, like, feature flag enable kar dein",Natural conversational delivery; include a actually hesitation where appropriate.
+069,hinglish_069.wav,true,false,false,mera package kal tak deliver hona chahiye,Natural conversational delivery; include a matlab hesitation where appropriate.
+070,hinglish_070.wav,false,true,false,"kal ka schedule bhej do, matlab team calendar wala",Natural conversational delivery; include a like hesitation where appropriate.
+071,hinglish_071.wav,true,false,true,"chalo, main baad mein call karta hoon",Natural conversational delivery; include a umm hesitation where appropriate.
+072,hinglish_072.wav,false,true,false,"mujhe courier track karna hai, actually AWB number abhi bhejta hoon",Natural conversational delivery; include a uh hesitation where appropriate.
+073,hinglish_073.wav,true,false,false,"haan theek hai, main kal morning mein update bhej dunga",Natural conversational delivery; include a actually hesitation where appropriate.
+074,hinglish_074.wav,false,true,false,"mujhe Hyderabad ka weather batao, actually wait, Bangalore bhi",Natural conversational delivery; include a matlab hesitation where appropriate.
+075,hinglish_075.wav,true,false,false,mujhe Hyderabad ka weather bata do,Natural conversational delivery; include a like hesitation where appropriate.
+076,hinglish_076.wav,false,true,false,"um main report share karunga, matlab pehle ek cheez check kar loon",Natural conversational delivery; include a umm hesitation where appropriate.
+077,hinglish_077.wav,true,false,false,please is order ko cancel kar do,Natural conversational delivery; include a uh hesitation where appropriate.
+078,hinglish_078.wav,false,true,false,"please invoice bhej do, uh, ek minute, new address add karna hai",Natural conversational delivery; include a actually hesitation where appropriate.
+079,hinglish_079.wav,true,false,false,meeting ko Friday afternoon par shift kar dete hain,Natural conversational delivery; include a matlab hesitation where appropriate.
+080,hinglish_080.wav,false,true,false,"aaj standup mein main bolunga ki, like, deployment pending hai",Natural conversational delivery; include a like hesitation where appropriate.
+081,hinglish_081.wav,true,false,true,main abhi payment complete kar raha hoon,Natural conversational delivery; include a umm hesitation where appropriate.
+082,hinglish_082.wav,false,true,false,"customer ko bolo ki refund, actually partial refund process hoga",Natural conversational delivery; include a uh hesitation where appropriate.
+083,hinglish_083.wav,true,false,false,yeh option mujhe kaafi useful laga,Natural conversational delivery; include a actually hesitation where appropriate.
+084,hinglish_084.wav,false,true,false,"main Delhi jaa raha hoon, matlab agar train confirm hui toh",Natural conversational delivery; include a matlab hesitation where appropriate.
+085,hinglish_085.wav,true,false,false,aap customer ko ek polite follow-up bhej do,Natural conversational delivery; include a like hesitation where appropriate.
+086,hinglish_086.wav,false,true,false,"ye file upload kar do aur, um, uske baad validation run karna",Natural conversational delivery; include a umm hesitation where appropriate.
+087,hinglish_087.wav,true,false,false,Bangalore ka traffic aaj bahut heavy hai,Natural conversational delivery; include a uh hesitation where appropriate.
+088,hinglish_088.wav,false,true,false,"mujhe analytics dashboard kholo, actually sales wala tab",Natural conversational delivery; include a actually hesitation where appropriate.
+089,hinglish_089.wav,true,false,false,mujhe English mein summary chahiye,Natural conversational delivery; include a matlab hesitation where appropriate.
+090,hinglish_090.wav,false,true,false,"agar API fail ho rahi hai toh, uh, logs bhi dekh lena",Natural conversational delivery; include a like hesitation where appropriate.
+091,hinglish_091.wav,true,false,true,"haan, is problem ka solution deploy kar do",Natural conversational delivery; include a umm hesitation where appropriate.
+092,hinglish_092.wav,false,true,false,"main soch raha tha ki, like, feature flag enable kar dein",Natural conversational delivery; include a uh hesitation where appropriate.
+093,hinglish_093.wav,true,false,false,mera package kal tak deliver hona chahiye,Natural conversational delivery; include a actually hesitation where appropriate.
+094,hinglish_094.wav,false,true,false,"kal ka schedule bhej do, matlab team calendar wala",Natural conversational delivery; include a matlab hesitation where appropriate.
+095,hinglish_095.wav,true,false,false,"chalo, main baad mein call karta hoon",Natural conversational delivery; include a like hesitation where appropriate.
+096,hinglish_096.wav,false,true,false,"mujhe courier track karna hai, actually AWB number abhi bhejta hoon",Natural conversational delivery; include a umm hesitation where appropriate.
+097,hinglish_097.wav,true,false,false,"haan theek hai, main kal morning mein update bhej dunga",Natural conversational delivery; include a uh hesitation where appropriate.
+098,hinglish_098.wav,false,true,false,"mujhe Hyderabad ka weather batao, actually wait, Bangalore bhi",Natural conversational delivery; include a actually hesitation where appropriate.
+099,hinglish_099.wav,true,false,false,mujhe Hyderabad ka weather bata do,Natural conversational delivery; include a matlab hesitation where appropriate.
+100,hinglish_100.wav,false,true,false,"um main report share karunga, matlab pehle ek cheez check kar loon",Natural conversational delivery; include a like hesitation where appropriate.
+101,hinglish_101.wav,true,false,true,please is order ko cancel kar do,Natural conversational delivery; include a umm hesitation where appropriate.
+102,hinglish_102.wav,false,true,false,"please invoice bhej do, uh, ek minute, new address add karna hai",Natural conversational delivery; include a uh hesitation where appropriate.
+103,hinglish_103.wav,true,false,false,meeting ko Friday afternoon par shift kar dete hain,Natural conversational delivery; include a actually hesitation where appropriate.
+104,hinglish_104.wav,false,true,false,"aaj standup mein main bolunga ki, like, deployment pending hai",Natural conversational delivery; include a matlab hesitation where appropriate.
+105,hinglish_105.wav,true,false,false,main abhi payment complete kar raha hoon,Natural conversational delivery; include a like hesitation where appropriate.
+106,hinglish_106.wav,false,true,false,"customer ko bolo ki refund, actually partial refund process hoga",Natural conversational delivery; include a umm hesitation where appropriate.
+107,hinglish_107.wav,true,false,false,yeh option mujhe kaafi useful laga,Natural conversational delivery; include a uh hesitation where appropriate.
+108,hinglish_108.wav,false,true,false,"main Delhi jaa raha hoon, matlab agar train confirm hui toh",Natural conversational delivery; include a actually hesitation where appropriate.
+109,hinglish_109.wav,true,false,false,aap customer ko ek polite follow-up bhej do,Natural conversational delivery; include a matlab hesitation where appropriate.
+110,hinglish_110.wav,false,true,false,"ye file upload kar do aur, um, uske baad validation run karna",Natural conversational delivery; include a like hesitation where appropriate.
+111,hinglish_111.wav,true,false,true,Bangalore ka traffic aaj bahut heavy hai,Natural conversational delivery; include a umm hesitation where appropriate.
+112,hinglish_112.wav,false,true,false,"mujhe analytics dashboard kholo, actually sales wala tab",Natural conversational delivery; include a uh hesitation where appropriate.
+113,hinglish_113.wav,true,false,false,mujhe English mein summary chahiye,Natural conversational delivery; include a actually hesitation where appropriate.
+114,hinglish_114.wav,false,true,false,"agar API fail ho rahi hai toh, uh, logs bhi dekh lena",Natural conversational delivery; include a matlab hesitation where appropriate.
+115,hinglish_115.wav,true,false,false,"haan, is problem ka solution deploy kar do",Natural conversational delivery; include a like hesitation where appropriate.
+116,hinglish_116.wav,false,true,false,"main soch raha tha ki, like, feature flag enable kar dein",Natural conversational delivery; include a umm hesitation where appropriate.
+117,hinglish_117.wav,true,false,false,mera package kal tak deliver hona chahiye,Natural conversational delivery; include a uh hesitation where appropriate.
+118,hinglish_118.wav,false,true,false,"kal ka schedule bhej do, matlab team calendar wala",Natural conversational delivery; include a actually hesitation where appropriate.
+119,hinglish_119.wav,true,false,false,"chalo, main baad mein call karta hoon",Natural conversational delivery; include a matlab hesitation where appropriate.
+120,hinglish_120.wav,false,true,false,"mujhe courier track karna hai, actually AWB number abhi bhejta hoon",Natural conversational delivery; include a like hesitation where appropriate.
