@@ -64,7 +64,8 @@ def stored_path(path: Path) -> str:
 
 
 def pipecat_rows(limit: int | None, raw_dir: Path, languages: set[str]) -> list[dict]:
-    dataset = load_dataset("pipecat-ai/smart-turn-data-v3.2-train", split="train")
+    # Stream rows so the large HF dataset is never materialized in Colab RAM.
+    dataset = load_dataset("pipecat-ai/smart-turn-data-v3.2-train", split="train", streaming=True)
     dataset = dataset.cast_column("audio", Audio(decode=False))
     rows: list[dict] = []
     language_counts: Counter[str] = Counter()
