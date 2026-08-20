@@ -32,7 +32,7 @@ Only the GRU remembers earlier audio. Whisper processes each window independentl
 
 ```text
 data/
-  prepare_data.py             # real-only Pipecat filter, clip-level splits, reporting
+  prepare_data.py             # language/synthetic filter, clip-level splits, reporting
   cache_embeddings.py         # frozen Whisper embeddings on Drive/local cache
   seed_hinglish_manifest.py   # 120 human-recording prompts; never generates TTS
   hinglish_recordings/        # put local WAV recordings here (ignored by git)
@@ -47,7 +47,7 @@ notebooks/train_colab.ipynb   # thin Colab wrapper around the scripts
 
 ## Data decisions
 
-The primary source is [`pipecat-ai/smart-turn-data-v3.2-train`](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train). It is a 271k-row, approximately 41 GB audio dataset. `prepare_data.py` first removes every row where `synthetic == True`; no synthetic/TTS clip is used. It then prints and stores the exact surviving count, counts by language, endpoint balance, and `midfiller`/`endfiller` balance in `data/processed/filter_report.json`. Do not claim those values before running the filter—the dataset can change upstream.
+The primary source is [`pipecat-ai/smart-turn-data-v3.2-train`](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train). It is a 271k-row, approximately 41 GB audio dataset. `prepare_data.py` streams it and applies the explicit language/synthetic policy: English is real-only, while Hindi synthetic clips may be allowed with `--allow-synthetic-languages hin`. It then stores retained, real, and synthetic counts, endpoint balance, and `midfiller`/`endfiller` balance in `filter_report.json`. Do not claim those values before running the filter—the dataset can change upstream.
 
 The Pipecat pipeline retains `eng` and `hin` clips by default (`--languages eng hin`). Synthetic clips are rejected for English but may be allowed for Hindi with `--allow-synthetic-languages hin`; the report records real and synthetic counts separately. Other languages are excluded before audio is downloaded or cached. When `--max-pipecat-clips` is used, the cap is allocated equally across the requested languages. Train/validation/test splitting also stratifies by language, endpoint, and filler flags. The language field is one value per clip, so it does not represent code-switching inside an utterance. That is why the separate hand-recorded Hinglish set is useful for evaluating code-switching behavior.
 
@@ -77,7 +77,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 export PYTHONPATH="$PWD/src"
 
-# First do a smoke run; omit --max-pipecat-clips for the full real-only dataset.
+# First do a smoke run; omit --max-pipecat-clips for a larger run after checking storage.
 python data/prepare_data.py --max-pipecat-clips 500
 python data/cache_embeddings.py --batch-size 32
 python train.py --epochs 2 --checkpoint-dir checkpoints/smoke
@@ -101,15 +101,20 @@ python finetune.py --unfreeze-last-layers 1 --epochs 4 --checkpoint-dir checkpoi
 
 Every training run writes `last.pt` after each epoch and can also write it during an epoch with `--checkpoint-every-steps N`. A partial checkpoint contains the deterministic epoch ordering, next batch cursor, global step, optimizer/model state, and RNG state, so it resumes at the next unseen batch. `--max-train-steps N` is a controlled interruption switch for validating that path; `--step-trace trace.jsonl` records the clip IDs consumed by every optimizer step. `best.pt`, `history.json`, and `test_metrics.json` stay in the checkpoint directory. Metrics are precision/recall/F1 for positive `turn_end` windows plus confusion matrices, separated by `pipecat` and `hinglish`; no misleading aggregate accuracy is used as the primary metric.
 
-Fill this table only with outputs produced by held-out test runs:
+### Results from the 3k Colab experiment
+
+This was intentionally a small, compute-limited experiment rather than a claim of production accuracy. The retained dataset contained 5,000 real English clips and 5,000 synthetic Hindi clips; the actual training subset was 2,400 train, 300 validation, and 300 test clips. There were no recorded Hinglish clips available in this run.
+
+The held-out Pipecat test results were:
 
 | Experiment | Loss | Pipecat P/R/F1 | Hinglish P/R/F1 | Notes |
 |---|---|---|---|---|
-| Frozen Whisper + GRU | weighted BCE | pending run | pending human recordings | baseline |
-| Frozen Whisper + GRU | focal | pending run | pending human recordings | imbalance comparison |
-| Last-layer Whisper fine-tune + GRU | weighted BCE | pending run | pending human recordings | low-LR comparison |
+| Frozen Whisper + GRU | weighted BCE | 14.17% / 88.06% / 24.41% | not measured | recall-oriented baseline |
+| Frozen Whisper + GRU | focal | 11.94% / 88.06% / 21.03% | not measured | more false positives than weighted BCE |
+| Frozen Whisper + GRU | weighted BCE, positive-weight scale 0.25 | 17.98% / 86.57% / 29.78% | not measured | better precision/F1 trade-off |
+| Frozen Whisper + GRU | weighted BCE, positive-weight scale 0.10 | 21.10% / 51.49% / 29.93% | not measured | precision-oriented operating point |
 
-This repository deliberately does not invent results, qualitative successes, or failure examples before recordings and held-out evaluation exist. When evaluating, keep examples of fillers, mid-code-switch pauses, and false positives alongside the metrics.
+These are measured results from the small run, not projections. The model catches many endpoint windows but still produces too many false positives. With more genuine Hindi and Hinglish recordings, stronger labels, and more training compute, the hypothesis is that the audio-native approach should improve—but no future number is claimed here.
 
 ## Policy and demo
 
@@ -148,16 +153,10 @@ python train.py --cache-dir "$ARTIFACTS/cache" --checkpoint-dir "$ARTIFACTS/chec
 
 ## GitHub setup
 
-This local folder is initialized as a Git repository but deliberately has no commit or remote. Run the following yourself, replacing the repository name if desired:
+The project is versioned in the `krishagarwal314/turn-detection` repository. For a fresh clone:
 
 ```bash
-cd "/home/krish-agarwal/AI_ML projs/main_resume_projs/turn-detection-model"
-git config user.name "swordfish-999"
-git config user.email "krishagarwal2009@gmail.com"
-git add .
-git commit -m "Initial streaming turn detection baseline"
-gh auth login
-gh repo create streaming-turn-detection --private --source=. --remote=origin --push
+git clone https://github.com/krishagarwal314/turn-detection.git
 ```
 
 Checkpoints, raw audio, and embedding caches are ignored; keep them on Drive during Colab training. If you later publish a small final checkpoint, use Git LFS or link to Drive rather than committing large binary artifacts normally.
@@ -165,7 +164,7 @@ Checkpoints, raw audio, and embedding caches are ignored; keep them on Drive dur
 ## Known limitations / next steps
 
 - Labels are clip-final-only and have at most one positive window, so they do not model ambiguous pauses well.
-- The primary dataset needs to be filtered at run time; counts are not hard-coded and no TTS clips are used.
+- The primary dataset is filtered at run time. This experiment deliberately used real English and synthetic Hindi because the available non-synthetic Hindi subset was insufficient; the report records that distinction explicitly.
 - The included Hinglish manifest is a recording protocol, not fake audio. Metrics remain incomplete until those human recordings are collected.
 - Recomputing Whisper for overlapping windows costs substantially more than a causal encoder or encoder cache.
 - The included policy evaluation needs prediction records emitted from a test run; expanding it into a calibration sweep and per-language error analysis is a useful next iteration.
