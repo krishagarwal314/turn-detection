@@ -2,6 +2,23 @@
 
 A compact real-time turn-end detector for Indian English and Hinglish conversation. Every 200 ms it returns a raw `P(turn_end)` for the latest 1-second audio window. The model is designed for a voice-agent pipeline where the application, not the neural model, decides when to interrupt or hand the floor back.
 
+## Why this approach
+
+The obvious alternative is a transcript-first detector: run speech-to-text, then ask a language model whether the transcript sounds complete. That can be very accurate for semantic cases such as unfinished Hindi sentences, addresses, and phone numbers, but it has a cost: the system must wait for transcription, pay for a decoder or an external STT service, and it loses direct access to silence, hesitation, intonation, and other acoustic evidence. The challenge asked for an audio-based detector, so this project deliberately keeps an audio-native path as its primary solution. A transcript-based detector remains a useful comparison or future second signal, not a replacement for the audio model.
+
+The dataset forced another explicit decision. The Pipecat collection contains abundant real English audio, but the usable non-synthetic Hindi subset was not sufficient for a balanced experiment. We therefore kept English real-only and allowed synthetic Hindi deliberately, recording that choice in `filter_report.json` instead of silently presenting synthetic Hindi as human data. The small run is consequently a baseline: it demonstrates the pipeline and the experiments, but it cannot establish real-Hindi generalization. The included Hinglish recording sheet is the path to that missing evaluation set.
+
+Each modeling choice follows from those constraints:
+
+- **One-second windows every 200 ms:** enough local context to hear a pause while still producing a frequent streaming decision.
+- **Whisper Tiny encoder:** a strong pretrained acoustic representation without paying for text generation on every window.
+- **Frozen encoder first:** makes iteration possible on a Colab GPU and isolates the temporal/classification experiment from expensive end-to-end fine-tuning.
+- **GRU plus classifier head:** the encoder sees windows independently; the GRU is what remembers the conversation across windows and emits one probability per timestep.
+- **Clip-level final-window labels:** the source metadata identifies whether the clip ends, but does not provide richer pause annotations. This is honest supervision, though sparse.
+- **Separate threshold policy:** the model supplies evidence; the application chooses the false-interruption versus latency trade-off.
+
+The result should be read as a carefully instrumented baseline with a clear path forward—better real Hindi/Hinglish recordings, richer pause labels, valid-frame pooling, and eventually a causal acoustic encoder—not as a claim that this first small run is production-ready.
+
 ## Architecture
 
 ```text
