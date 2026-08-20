@@ -2,9 +2,24 @@
 
 An audio-native turn-end detector for Indian English and Hindi/Hinglish conversation. Every 200 ms it returns a raw `P(turn_end)` for the latest 1-second audio window; a separate policy decides when that probability is strong enough to end the turn.
 
-Most transcript-first solutions run a speech-to-text system and then pass the text through a BERT-family end-of-sentence classifier. That can work well, but the classifier itself is often 100M+ parameters, and the full system pays for transcription plus a second model before it can decide. I wanted to test a smaller audio-native route: Whisper Tiny's encoder is roughly 19M parameters on its own (the complete encoder-decoder model is about 39M), and it already provides a useful pretrained acoustic representation. The decoder is unnecessary when the output is a turn probability rather than text.
+## Approach
 
-This repository was built with heavy AI-agent assistance—roughly 90% of the implementation was generated or edited with Codex/other coding agents. It was not a one-shot prompt or a pretend result: I iterated on the data policy, label construction, checkpoint semantics, class imbalance, Colab failures, and evaluation trade-offs. The final training run was deliberately small because the available real Hindi data and Colab compute/time were limited.
+Most other turn detectors are transcript-first: speech-to-text runs first, then a language model decides whether the user is finished. That is powerful, but it adds transcription latency and a second, often large, language model. I chose an audio-native route instead: Whisper Tiny's encoder is roughly 19M parameters on its own (about 39M for the full encoder-decoder), and the decoder is unnecessary when the output is only a turn probability.
+
+Around 90% of the code was generated or edited with AI coding agents, while I iterated on the data policy, labels, experiments, and evaluation myself. I had a tight deadline and trained on a free Google Colab instance, so this run was about building and testing a sensible solution—not claiming production-level accuracy.
+
+## Data preparation at a glance
+
+Data quality was the main constraint, so preparation is explicit rather than hidden:
+
+1. Stream the Pipecat dataset instead of loading its ~41 GB of audio into Colab RAM.
+2. Keep English and Hindi rows only; reject synthetic English and allow synthetic Hindi explicitly.
+3. Decode every clip to mono 16 kHz `float32` audio and write clip-level JSONL manifests.
+4. Split by clip—not by window—to prevent overlapping windows from leaking across train/validation/test.
+5. Balance the language cap and stratify where possible by language, endpoint, and filler flags.
+6. Convert each clip into 1-second windows with a 200-ms hop; only the final window is positive for an endpoint clip.
+
+The resulting labels are intentionally sparse because the source metadata tells us whether a clip ends a turn, not where every ambiguous pause occurs.
 
 ## Design decisions
 
@@ -19,25 +34,16 @@ This repository was built with heavy AI-agent assistance—roughly 90% of the im
 ## Architecture
 
 ```text
-fresh 1.0 s raw audio window, every 200 ms
-                    |
-                    v
- Whisper Tiny encoder (frozen baseline; no shared encoder state)
-                    |
-           mean pool over time
-                    |
-                    v
-       384-d embedding -----> GRU hidden state carried across windows
-                                      |
-                                      v
-                             small MLP + sigmoid
-                                      |
-                                      v
-                        raw P(turn_end) every 200 ms
-                                      |
-                          separate threshold/k-frame policy
-                                      v
-                                 END TURN event
+1.0 s audio window ──(200 ms hop)──> Whisper Tiny encoder
+                                      (decoder removed)
+                                             │
+                                      mean-pool → 384-d
+                                             │
+                         ordered embeddings → GRU → MLP → P(turn_end)
+                                                               │
+                                             threshold + consecutive-frame policy
+                                                               │
+                                                            END TURN
 ```
 
 Only the GRU remembers earlier audio. Whisper processes each window independently—there is no causal-attention modification, cross-window key/value cache, or reuse of Whisper activations. This is deliberately simpler and less efficient than true streaming/causal Whisper, but is reliable to implement within this project’s time budget. A production version should benchmark a causal acoustic encoder or incremental encoder cache before scaling traffic.
@@ -59,7 +65,7 @@ demo.py                       # Gradio microphone or upload simulation
 notebooks/train_colab.ipynb   # thin Colab wrapper around the scripts
 ```
 
-## Data decisions
+## Data preparation details
 
 The primary source is [`pipecat-ai/smart-turn-data-v3.2-train`](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train), a roughly 271k-row, approximately 41 GB audio dataset. Preparation is streamed so Colab does not materialize the complete dataset in RAM.
 
