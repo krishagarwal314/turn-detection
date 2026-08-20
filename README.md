@@ -13,7 +13,7 @@ Around 90% of the code was generated or edited with AI coding agents, while I it
 Data quality was the main constraint, so preparation is explicit rather than hidden:
 
 1. Stream the Pipecat dataset instead of loading its ~41 GB of audio into Colab RAM.
-2. Keep English and Hindi rows only; reject synthetic English and allow synthetic Hindi explicitly.
+2. Keep English and Hindi rows only; reject synthetic English and allow synthetic Hindi explicitly (because the dataset did not have any real hindi rows).
 3. Decode every clip to mono 16 kHz `float32` audio and write clip-level JSONL manifests.
 4. Split by clip—not by window—to prevent overlapping windows from leaking across train/validation/test.
 5. Balance the language cap and stratify where possible by language, endpoint, and filler flags.
