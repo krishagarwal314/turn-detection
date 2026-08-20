@@ -1,23 +1,20 @@
 # Streaming Turn Detection — Whisper Tiny + GRU
 
-A compact real-time turn-end detector for Indian English and Hinglish conversation. Every 200 ms it returns a raw `P(turn_end)` for the latest 1-second audio window. The model is designed for a voice-agent pipeline where the application, not the neural model, decides when to interrupt or hand the floor back.
+An audio-native turn-end detector for Indian English and Hindi/Hinglish conversation. Every 200 ms it returns a raw `P(turn_end)` for the latest 1-second audio window; a separate policy decides when that probability is strong enough to end the turn.
 
-## Why this approach
+Most transcript-first solutions run a speech-to-text system and then pass the text through a BERT-family end-of-sentence classifier. That can work well, but the classifier itself is often 100M+ parameters, and the full system pays for transcription plus a second model before it can decide. I wanted to test a smaller audio-native route: Whisper Tiny's encoder is roughly 19M parameters on its own (the complete encoder-decoder model is about 39M), and it already provides a useful pretrained acoustic representation. The decoder is unnecessary when the output is a turn probability rather than text.
 
-The obvious alternative is a transcript-first detector: run speech-to-text, then ask a language model whether the transcript sounds complete. That can be very accurate for semantic cases such as unfinished Hindi sentences, addresses, and phone numbers, but it has a cost: the system must wait for transcription, pay for a decoder or an external STT service, and it loses direct access to silence, hesitation, intonation, and other acoustic evidence. The challenge asked for an audio-based detector, so this project deliberately keeps an audio-native path as its primary solution. A transcript-based detector remains a useful comparison or future second signal, not a replacement for the audio model.
+This repository was built with heavy AI-agent assistance—roughly 90% of the implementation was generated or edited with Codex/other coding agents. It was not a one-shot prompt or a pretend result: I iterated on the data policy, label construction, checkpoint semantics, class imbalance, Colab failures, and evaluation trade-offs. The final training run was deliberately small because the available real Hindi data and Colab compute/time were limited.
 
-The dataset forced another explicit decision. The Pipecat collection contains abundant real English audio, but the usable non-synthetic Hindi subset was not sufficient for a balanced experiment. We therefore kept English real-only and allowed synthetic Hindi deliberately, recording that choice in `filter_report.json` instead of silently presenting synthetic Hindi as human data. The small run is consequently a baseline: it demonstrates the pipeline and the experiments, but it cannot establish real-Hindi generalization. The included Hinglish recording sheet is the path to that missing evaluation set.
+## Design decisions
 
-Each modeling choice follows from those constraints:
+**Why not use Whisper's cache as the sequence model?** Whisper processes each overlapping audio window independently in this baseline; it does not expose a reliable causal cross-window KV cache for this setup. Caching the resulting embeddings makes repeated experiments faster, but it does not create temporal context. A GRU consumes the ordered 384-dimensional encoder embeddings and carries the conversational state from one window to the next. That gives us context without pretending Whisper is streaming-causal.
 
-- **One-second windows every 200 ms:** enough local context to hear a pause while still producing a frequent streaming decision.
-- **Whisper Tiny encoder:** a strong pretrained acoustic representation without paying for text generation on every window.
-- **Frozen encoder first:** makes iteration possible on a Colab GPU and isolates the temporal/classification experiment from expensive end-to-end fine-tuning.
-- **GRU plus classifier head:** the encoder sees windows independently; the GRU is what remembers the conversation across windows and emits one probability per timestep.
-- **Clip-level final-window labels:** the source metadata identifies whether the clip ends, but does not provide richer pause annotations. This is honest supervision, though sparse.
-- **Separate threshold policy:** the model supplies evidence; the application chooses the false-interruption versus latency trade-off.
+**Why 1-second windows every 200 ms?** A one-second window contains enough local speech and silence to distinguish a boundary, while the 200-ms hop gives a responsive update rate. Short final windows are zero-padded so every encoder input has the same shape.
 
-The result should be read as a carefully instrumented baseline with a clear path forward—better real Hindi/Hinglish recordings, richer pause labels, valid-frame pooling, and eventually a causal acoustic encoder—not as a claim that this first small run is production-ready.
+**What supervision was actually available?** The source metadata tells us only whether a clip ends at a turn boundary. It does not mark every ambiguous pause. Therefore an endpoint clip has one positive label—the final window—and all earlier windows are negative. A non-endpoint clip has only negative labels. This is honest but sparse supervision, and it explains both the severe class imbalance and the model's tendency to trade recall against false interruptions.
+
+**Why keep the policy outside the model?** The neural model provides evidence at every window. The application may prefer fast responses or may strongly penalize false interruptions, so threshold and consecutive-frame requirements remain configurable instead of being hidden inside the loss.
 
 ## Architecture
 
@@ -64,9 +61,23 @@ notebooks/train_colab.ipynb   # thin Colab wrapper around the scripts
 
 ## Data decisions
 
-The primary source is [`pipecat-ai/smart-turn-data-v3.2-train`](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train). It is a 271k-row, approximately 41 GB audio dataset. `prepare_data.py` streams it and applies the explicit language/synthetic policy: English is real-only, while Hindi synthetic clips may be allowed with `--allow-synthetic-languages hin`. It then stores retained, real, and synthetic counts, endpoint balance, and `midfiller`/`endfiller` balance in `filter_report.json`. Do not claim those values before running the filter—the dataset can change upstream.
+The primary source is [`pipecat-ai/smart-turn-data-v3.2-train`](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train), a roughly 271k-row, approximately 41 GB audio dataset. Preparation is streamed so Colab does not materialize the complete dataset in RAM.
 
-The Pipecat pipeline retains `eng` and `hin` clips by default (`--languages eng hin`). Synthetic clips are rejected for English but may be allowed for Hindi with `--allow-synthetic-languages hin`; the report records real and synthetic counts separately. Other languages are excluded before audio is downloaded or cached. When `--max-pipecat-clips` is used, the cap is allocated equally across the requested languages. Train/validation/test splitting also stratifies by language, endpoint, and filler flags. The language field is one value per clip, so it does not represent code-switching inside an utterance. That is why the separate hand-recorded Hinglish set is useful for evaluating code-switching behavior.
+The language decision was the most important practical compromise. Real English clips were available in useful volume. The Hindi rows we could obtain in the time window were synthetic, and the synthetic Hindi was often very formal, **shudh Hindi 😂**, closer to documentary or written narration than conversational Hinglish. That means it cannot honestly stand in for natural Hindi turn-taking. However, discarding Hindi entirely would make the requested Indian-language experiment impossible, so I kept real English and synthetic Hindi as a clearly labeled baseline. Synthetic English is still rejected. The report records the distinction instead of hiding it.
+
+For the measured run, the filter retained 10,000 clips: 5,000 real `eng` and 5,000 synthetic `hin`. The actual training experiment used a smaller 3,000-clip subset: 2,400 train, 300 validation, and 300 test. No human Hinglish recordings were available, so Hinglish metrics are intentionally absent. A 120-prompt recording sheet is included for collecting that missing evaluation data rather than fabricating it.
+
+Preparation does the following before training:
+
+1. Streams the dataset and keeps only the requested language codes.
+2. Rejects synthetic English and optionally allows synthetic Hindi explicitly.
+3. Decodes audio with `soundfile`, converts it to mono `float32`, and resamples it to 16 kHz.
+4. Saves one audio file per clip and records the source metadata in JSONL manifests.
+5. Splits by clip, never by window, so overlapping windows from one recording cannot leak across train/validation/test.
+6. Stratifies the split using language, endpoint status, and filler flags where the stratum has enough examples.
+7. Treats null filler metadata as false instead of accidentally turning missing values into positives.
+
+The authoritative evidence is the generated `filter_report.json`; counts are never hard-coded because the upstream dataset can change.
 
 Create the curated recording sheet once:
 
@@ -83,6 +94,10 @@ For a clip, generate 1-second windows at 200-ms hops; the final window is adjust
 Worked example: a 2.0-second endpoint clip gives windows ending at roughly `1.0, 1.2, 1.4, 1.6, 1.8, 2.0s` and labels `[0, 0, 0, 0, 0, 1]`. A 2.0-second non-endpoint clip gets `[0, 0, 0, 0, 0, 0]`. This provides sparse supervision—there is no label for a moderately likely pause—which is a known limitation.
 
 Windows from a clip never cross splits. The split stratum includes endpoint, `midfiller`, and `endfiller` flags so filler cases are not accidentally diluted.
+
+### Feature extraction
+
+Each 16-kHz waveform window is passed through `WhisperProcessor`, which converts the samples into Whisper's log-Mel input features. The frozen Whisper Tiny encoder produces a sequence of acoustic states; mean-pooling those states gives one 384-dimensional vector for that window. The cache stores a tensor shaped `[number_of_windows, 384]` plus the clip labels and metadata. Training then reads those vectors instead of repeatedly running Whisper, which is why caching is expensive once but makes the GRU experiments fast and reproducible. The cache is an optimization for iteration—it is not a substitute for temporal memory, which is the GRU's job.
 
 ## Reproduce locally
 
@@ -132,6 +147,15 @@ The held-out Pipecat test results were:
 | Frozen Whisper + GRU | weighted BCE, positive-weight scale 0.10 | 21.10% / 51.49% / 29.93% | not measured | precision-oriented operating point |
 
 These are measured results from the small run, not projections. The model catches many endpoint windows but still produces too many false positives. With more genuine Hindi and Hinglish recordings, stronger labels, and more training compute, the hypothesis is that the audio-native approach should improve—but no future number is claimed here.
+
+### What the experiments taught us
+
+- **Weighted BCE** strongly protected recall but produced too many false interruptions.
+- **Focal loss** did not help on this small split; it reached lower precision and lower F1 than weighted BCE.
+- **Reducing the positive weight** improved the operating point. A scale of `0.25` reached 17.98% precision, 86.57% recall, and 29.78% F1. A scale of `0.10` reached 21.10% precision, 51.49% recall, and 29.93% F1.
+- **The policy is a product decision, not a magic fix.** Requiring consecutive high-probability windows reduces false interruptions, but it also misses more endpoints. The current policy evaluator is exploratory and its latency calculation still needs calibration before being reported as a final latency benchmark.
+
+This is the depth of the solutioning: the project does not stop at a classifier score. It traces the data provenance, exposes the real/synthetic compromise, measures class imbalance, compares losses, adds precision-oriented weighting, saves deterministic mid-epoch checkpoints, and keeps the final interruption policy separate so its trade-offs are visible.
 
 ## Policy and demo
 
